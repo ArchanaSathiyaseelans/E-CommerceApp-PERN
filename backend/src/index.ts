@@ -4,6 +4,7 @@ import cors from "cors";
 
 import fs from "node:fs";
 import path from "node:path";
+import dns from "dns";
 
 import * as Sentry from "@sentry/node";
 
@@ -21,6 +22,8 @@ import orderRouter from "./routes/orderRouter";
 
 import { polarWebhookHandler } from "./webhooks/polar";
 import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
+
+dns.setServers(["0.0.0.0", "8.8.8.8"]);
 
 const env = getEnv();
 const app = express();
@@ -74,7 +77,12 @@ if (fs.existsSync(publicDir)) {
 Sentry.setupExpressErrorHandler(app);
 
 app.use(
-  (_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  (
+    _err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
     const sentryId = (res as express.Response & { sentry?: string }).sentry;
 
     res.status(500).json({
